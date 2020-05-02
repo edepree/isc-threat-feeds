@@ -1,64 +1,33 @@
-import os
-import logging
-import argparse
+import json
+import boto3
 import urllib.request
 import xml.etree.ElementTree as ET 
 
-def process_feed(feed_name, output_folder):
-    """Download, parse, and output feeds from the Internet Storm Center into flat files with one IP per line."""
+def lambda_handler(event, context):
+    s3_bucket = 'REPLACE_ME'
+    s3 = boto3.client('s3')
 
-    isc_feeds = {'research': ['blindferret', 'cybergreen', 'erratasec', 'onyphe', 'rapid7sonar', 'shadowserver', 'shodan', 'univmichigan'],
-                 'others': ['torexit', 'miner']}
+    threat_feeds_url = 'https://isc.sans.edu/api/threatfeeds/'
+    html_request = urllib.request.urlopen(threat_feeds_url).read()
+    root = ET.fromstring(html_request)
 
-    for category, feeds in isc_feeds.items():
-        if feed_name != 'all' and category != feed_name:
-            logging.debug(f'Ignoring feed: {category}')
-        else:
-            logging.debug(f'Processing feed: {category}')
+    for element in root.findall('threatfeed'):
+        if element.find('datatype').text == 'is_ipv4':
+            threat_list_name = element.find('type').text
+            threat_list_url = f'https://isc.sans.edu/api/threatlist/{threat_list_name}'
+            #print(f'Found {threat_list_name}')
 
-            with open(f'{output_folder}{os.sep}{category}.txt', 'w') as output_file:
-                logging.debug(f'Writing to file: {output_file.name}')
+            html_request = urllib.request.urlopen(threat_list_url).read()
+            root = ET.fromstring(html_request)
 
-                for feed in feeds:
-                    feed_url = f'https://isc.sans.edu/api/threatlist/{feed}'
-                    html_request = urllib.request.urlopen(feed_url).read()
-                    root = ET.fromstring(html_request)
-                    
-                    for element in root.findall(feed):
-                        output_file.write(element.find('ipv4').text + '\n')
+            threat_list_ips = ''
+            for element in root.findall(threat_list_name):
+                threat_list_ips += element.find('ipv4').text + '\n'
 
-
-def validate_directory(path):
-    """An argparse validator to confirm user input is a valid directory."""
-
-    if os.path.isdir(path):
-        return path
-    else:
-        raise argparse.ArgumentTypeError(f'cannot find directory {path}')
+            if len(threat_list_ips) > 0:
+                #print(threat_list_ips)
+                s3.put_object(Bucket=s3_bucket, Key=f'{threat_list_name}.txt', Body=threat_list_ips)
 
 
-def main():
-    """Bootstrapping function including argument parsing and setting up logging."""
-
-    parser = argparse.ArgumentParser(description="""A parser for converting thread feeds from the
-                                                    Internet Storm Center into IPv4 lists for consumption
-                                                    by other tools/processes.""",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
-    parser.add_argument('--feed', dest='threat_feed', choices=['research', 'others', 'all'], default='all',
-                        help='the thread feed(s) to process')
-    parser.add_argument('--output', dest='output_directory', type=validate_directory, default=os.getcwd(),
-                        help='the output directory for the parsed feeds')
-    parser.add_argument('--debug', dest='logging_level', action='store_const', const=logging.DEBUG,
-                        default=logging.INFO, help='enable debug logging')
-    
-    args = parser.parse_args()
-    logging.basicConfig(format='%(levelname)-8s %(message)s', level=args.logging_level)
-
-    logging.info(f'Processing the threat feed: {args.threat_feed}')
-    logging.info(f'Outputting results to: {args.output_directory}') 
-    process_feed(args.threat_feed, args.output_directory)
-
-
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    lambda_handler(None, None)
