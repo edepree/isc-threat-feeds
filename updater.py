@@ -4,6 +4,10 @@ import urllib.request
 import xml.etree.ElementTree as ET 
 
 def lambda_handler(event, context):
+    research_list_names = ['blindferret', 'cybergreen', 'erratasec', 'onyphe',
+                           'rapid7sonar', 'shadowserver', 'shodan', 'univmichigan']
+    research_list_ips = ''
+
     s3_bucket = 'REPLACE_ME'
     s3 = boto3.client('s3')
 
@@ -26,7 +30,14 @@ def lambda_handler(event, context):
 
             if len(threat_list_ips) > 0:
                 #print(threat_list_ips)
-                s3.put_object(Bucket=s3_bucket, Key=f'{threat_list_name}.txt', Body=threat_list_ips)
+                s3.put_object(Bucket=s3_bucket, Key=f'{threat_list_name}.txt',
+                              Body=threat_list_ips, ACL='public-read')
+
+                if threat_list_name in research_list_names:
+                    research_list_ips += threat_list_ips
+
+    s3.put_object(Bucket=s3_bucket, Key='research-combine.txt',
+                  Body=research_list_ips, ACL='public-read')
 
 
 #if __name__ == '__main__':
