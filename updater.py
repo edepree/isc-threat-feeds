@@ -4,9 +4,10 @@ import urllib.request
 import xml.etree.ElementTree as ET 
 
 def lambda_handler(event, context):
-    research_names = ['blindferret', 'cybergreen', 'erratasec', 'onyphe',
-                      'rapid7sonar', 'shadowserver', 'shodan', 'univmichigan',
-                      'ipip', 'alphastrikelabs']
+    research_names = ['adscore','alphastrikelabs','arbor','blindferret',
+                      'censys','cybergreen','erratasec','internetcensus',
+                      'ipip','netsystems' ,'onyphe','rapid7sonar','scorecard',
+                      'shadowserver','shodan','stretchoid','univmichigan','univsydney']
     research_ips = ''
 
     port_scanner_names = ['blocklistde110', 'blocklistde143', 'blocklistde21',
