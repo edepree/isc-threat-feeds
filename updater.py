@@ -10,12 +10,11 @@ def lambda_handler(event, context):
                       'shadowserver','shodan','stretchoid','univmichigan','univsydney']
     research_ips = ''
 
-    port_scanner_names = ['blocklistde110', 'blocklistde143', 'blocklistde21',
-                          'blocklistde22', 'blocklistde25', 'blocklistde443',
-                          'blocklistde80', 'blocklistde993', 'blocklistdeapache',
-                          'blocklistdeasterisk', 'blocklistdebots', 'blocklistdebruteforcelogin',
-                          'blocklistdecourierimap', 'blocklistdecourierpop3', 'openbl_ftp',
-                          'openbl_http', 'openbl_mail', 'openbl_smtp', 'openbl_ssh']
+    port_scanner_names = ['blocklistde110','blocklistde143','blocklistde21',
+                          'blocklistde22','blocklistde25','blocklistde443',
+                          'blocklistde80','blocklistde993','blocklistdeapache',
+                          'blocklistdeasterisk','blocklistdebots','blocklistdebruteforcelogin',
+                          'blocklistdecourierimap','blocklistdecourierpop3']
     port_scanner_ips = ''
 
     s3_bucket = 'REPLACE_ME'
