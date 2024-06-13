@@ -1,6 +1,8 @@
-import json
-import boto3
 import requests
+
+from boto3 import client
+from ipaddress import IPv4Address
+from ipaddress import collapse_addresses
 
 def lambda_handler(event, context):
     threat_category_names = ['research']
@@ -20,16 +22,16 @@ def process_response(response, file_name):
     if response.status_code == requests.codes.ok:
         response_content = response.json()
         
-        ipv4_addresses = set()
+        network_addresses = []
+
         for element in response_content:
-            ipv4_address = element['ipv4']
-            ipv4_addresses.add(ipv4_address)
+            network_addresses.append(IPv4Address(element['ipv4']))
 
-        ipv4_addresses_string = '\n'.join(ipv4_addresses)
+        condensed_addresses = collapse_addresses(network_addresses)
+        condensed_addresses_str = '\n'.join([x.with_prefixlen for x in condensed_addresses])
 
-        s3 = boto3.client('s3')
-        s3.put_object(Bucket='REPLACE_ME', Key=f'{file_name}.txt', Body=ipv4_addresses_string, ACL='public-read')
+        s3 = client('s3')
+        s3.put_object(Bucket='isc-threat-feed-storage', Key=f'{file_name}.txt', Body=condensed_addresses_str, ACL='public-read')
 
-
-# if __name__ == '__main__':
-#    lambda_handler(None, None)
+if __name__ == '__main__':
+   lambda_handler(None, None)
