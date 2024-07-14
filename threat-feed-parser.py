@@ -1,3 +1,4 @@
+import os
 import requests
 
 from boto3 import client
@@ -31,7 +32,7 @@ def process_response(response, file_name):
         condensed_addresses_str = '\n'.join([x.with_prefixlen for x in condensed_addresses])
 
         s3 = client('s3')
-        s3.put_object(Bucket='isc-threat-feed-storage', Key=f'{file_name}.txt', Body=condensed_addresses_str, ACL='public-read')
+        s3.put_object(Bucket=os.environ['OUTPUT_S3_BUCKET'], Key=f'{file_name}.txt', Body=condensed_addresses_str, ACL='public-read')
 
 if __name__ == '__main__':
    lambda_handler(None, None)
