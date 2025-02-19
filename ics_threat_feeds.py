@@ -21,7 +21,7 @@ def process_response(response):
         abort(response.status_code)
 
 @app.errorhandler(404)
-def page_not_found():
+def page_not_found(error):
     return redirect('https://github.com/edepree/isc-threat-feeds'), 302
 
 @app.route('/threatcategory/<any(bots, malware, research):threat_category_name>', methods=['GET'])

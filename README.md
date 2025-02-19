@@ -24,7 +24,7 @@ pip install -r requirements.txt
 
 ## Server Setup
 
-* Copy the unit file `isc-threat-feeds-server.service` to `/etc/systemd/system/s`
+* Copy the unit file `isc-threat-feeds-server.service` to `/etc/systemd/system`
 * Realod Systemd `systemctl daemon-reload`
 * Start the service `systemctl start isc-threat-feeds-server.service`
 * Enable the service `systemctl enable isc-threat-feeds-server.service`
