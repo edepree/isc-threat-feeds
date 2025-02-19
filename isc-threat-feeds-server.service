@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn Web Server for isc-threat-feeds
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/isc-threat-feeds
+Environment="PATH=/home/ubuntu/isc-threat-feeds/.venv/bin"
+ExecStart=/home/ubuntu/isc-threat-feeds/.venv/bin/gunicorn --bind 0.0.0.0:8080 ics_threat_feeds:app
+
+[Install]
+WantedBy=multi-user.target

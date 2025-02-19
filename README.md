@@ -1,9 +1,12 @@
 # isc-threat-feeds
-A parser, and the output files, for converting thread feeds from the Internet Storm Center into IPv4 lists for consumption by other tools/processes.
+Parser, and the output files, for converting thread feeds from the Internet Storm Center into IPv4 lists for consumption by other tools/processes.
 
-This is running as a daily AWS Lambda job and results can be found at https://isc-threat-feed-storage.s3.amazonaws.com/
-
-As the requests library is use, it must be packaged with the `lambda-function.py` file before being uploaded to Amazon.
+Current endpoints the application supports are:
+* http://isc-threat-feeds.projectlaunchpad.net:8080/threatcategory/bots
+* http://isc-threat-feeds.projectlaunchpad.net:8080/threatcategory/malware
+* http://isc-threat-feeds.projectlaunchpad.net:8080/threatcategory/research
+* http://isc-threat-feeds.projectlaunchpad.net:8080/threatlist/alltor
+* http://isc-threat-feeds.projectlaunchpad.net:8080/threatlist/torexit
 
 ## Environment Setup
 A basic pattern for setting up virtual environment when performing development
@@ -18,3 +21,10 @@ python -m pip install --upgrade pip
 # install required python libraries
 pip install -r requirements.txt
 ```
+
+## Server Setup
+
+* Copy the unit file `isc-threat-feeds-server.service` to `/etc/systemd/system/s`
+* Realod Systemd `systemctl daemon-reload`
+* Start the service `systemctl start isc-threat-feeds-server.service`
+* Enable the service `systemctl enable isc-threat-feeds-server.service`
