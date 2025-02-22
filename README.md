@@ -1,12 +1,12 @@
 # isc-threat-feeds
-Parser, and the output files, for converting thread feeds from the Internet Storm Center into IPv4 lists for consumption by other tools/processes.
+Parses and outputs feeds from the Internet Storm Center into IPv4 lists for consumption by other tools/processes.
 
 Current endpoints the application supports are:
-* http://isc-threat-feeds.projectlaunchpad.net:8080/threatcategory/bots
-* http://isc-threat-feeds.projectlaunchpad.net:8080/threatcategory/malware
-* http://isc-threat-feeds.projectlaunchpad.net:8080/threatcategory/research
-* http://isc-threat-feeds.projectlaunchpad.net:8080/threatlist/alltor
-* http://isc-threat-feeds.projectlaunchpad.net:8080/threatlist/torexit
+* http://isc-threat-feeds.projectlaunchpad.net/threatcategory/bots
+* http://isc-threat-feeds.projectlaunchpad.net/threatcategory/malware
+* http://isc-threat-feeds.projectlaunchpad.net/threatcategory/research
+* http://isc-threat-feeds.projectlaunchpad.net/threatlist/alltor
+* http://isc-threat-feeds.projectlaunchpad.net/threatlist/torexit
 
 ## Environment Setup
 A basic pattern for setting up virtual environment when performing development
@@ -23,8 +23,13 @@ pip install -r requirements.txt
 ```
 
 ## Server Setup
+### Nginx
+1. Install nginx `apt install nginx`
+2. Disable the default nginx site `unlink /etc/nginx/sites-enabled/default`
+3. Copy `isc-threat-feeds-proxy` to `/etc/nginx/sites-available` and enable site `ln -s /etc/nginx/sites-available/isc-threat-feeds-proxy /etc/nginx/sites-enabled/`
+5. Start and enable Nginx `systemctl start nginx` and `systemctl enable nginx`
 
-* Copy the unit file `isc-threat-feeds-server.service` to `/etc/systemd/system`
-* Realod Systemd `systemctl daemon-reload`
-* Start the service `systemctl start isc-threat-feeds-server.service`
-* Enable the service `systemctl enable isc-threat-feeds-server.service`
+### Gunicorn
+1. Copy the unit file `isc-threat-feeds-server.service` to `/etc/systemd/system`
+2. Realod Systemd `systemctl daemon-reload`
+3. Start and enable service `systemctl start isc-threat-feeds-server.service` and `systemctl enable isc-threat-feeds-server.service`
