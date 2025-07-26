@@ -19,4 +19,7 @@ docker run -d \
     --name $CONTAINER_NAME \
     -p $PORT:8080 \
     --restart unless-stopped \
+    --cap-drop=ALL \
+    --cap-add=NET_BIND_SERVICE \
+    --security-opt no-new-privileges \
     $IMAGE_NAME
