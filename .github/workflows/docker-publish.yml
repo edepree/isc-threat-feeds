@@ -1,13 +1,8 @@
-name: Build and Push Container Image to GHCR
+name: Build and Push Appliation
 
-# run on pushing to master
-# on:
-#   push:
-#     branches: [ "master" ]
-
-# run manually
 on:
-  workflow_dispatch:
+  push:
+    branches: [ "master" ]
 
 env:
   REGISTRY: ghcr.io
@@ -18,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      metadata: read
       packages: write
 
     steps:

@@ -2,14 +2,15 @@ FROM python:3.13-alpine
 
 WORKDIR /app
 
-# create non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# copy application and setup requirements
-COPY entrypoint.sh requirements.txt ics_threat_feeds.py .
+# copy and setup requirements
+COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# switch to non-root user
+# copy application
+COPY entrypoint.sh ics_threat_feeds.py .
+
+# create and switch to non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
 # ensures output is logged in real time
