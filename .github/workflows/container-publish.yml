@@ -55,4 +55,3 @@ jobs:
           package-name: ${{ github.event.repository.name }}
           package-type: container
           delete-only-untagged-versions: true
-          min-versions-to-keep: 3
