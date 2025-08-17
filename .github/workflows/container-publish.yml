@@ -3,10 +3,10 @@ name: Build and Publish Application
 on:
   push:
     branches: [ 'master' ]
+    tags: [ '*' ]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker Build Environment
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to ${{ env.REGISTRY }}
@@ -32,7 +32,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5

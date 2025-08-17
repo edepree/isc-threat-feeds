@@ -1,14 +1,18 @@
 {
-    "name": "isc-threat-feeds-devcontainer",
+    "name": "Dockerfile.dev",
     "build": {
         "dockerfile": "../Dockerfile.dev",
         "context": ".."
     },
     "customizations": {
         "vscode": {
+            "settings": {
+                "remote.autoForwardPorts": false
+            },
             "extensions": [
+                "github.vscode-github-actions",
                 "ms-python.isort",
-                "streetsidesoftware.code-spell-checker",
+                "streetsidesoftware.code-spell-checker"
             ]
         }
     }
