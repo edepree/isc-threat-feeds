@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eu
 
 echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] Starting Gunicorn..."
 
