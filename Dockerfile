@@ -8,7 +8,7 @@ RUN pip install --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt
 
 # copy application
-COPY entrypoint.sh ics_threat_feeds.py .
+COPY entrypoint.sh isc_threat_feeds.py .
 RUN chmod +x entrypoint.sh
 
 # Add a tiny PID1 to forward signals correctly

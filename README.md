@@ -15,7 +15,7 @@ The application is built through GitHub Actions and published to the GitHub Cont
 ```bash
 docker run \
   -d \
-  --name ics-threat-feeds \
+  --name isc-threat-feeds \
   -p 80:8080 \
   --restart unless-stopped \
   ghcr.io/edepree/isc-threat-feeds:master
