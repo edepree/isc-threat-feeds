@@ -1,8 +1,7 @@
 {
     "name": "Dockerfile.dev",
     "build": {
-        "dockerfile": "../Dockerfile.dev",
-        "context": ".."
+        "dockerfile": "Dockerfile.dev"
     },
     "customizations": {
         "vscode": {
@@ -10,9 +9,12 @@
                 "remote.autoForwardPorts": false
             },
             "extensions": [
-                "github.vscode-github-actions",
+                "ms-python.debugpy",
                 "ms-python.isort",
-                "streetsidesoftware.code-spell-checker"
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.vscode-python-envs",
+                "streetsidesoftware.code-spell-checker",
             ]
         }
     }
