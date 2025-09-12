@@ -42,16 +42,16 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  prune-ghcr:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+  # prune-ghcr:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     packages: write
 
-    steps:
-      - uses: actions/delete-package-versions@v5
-        with:
-          package-name: ${{ github.event.repository.name }}
-          package-type: container
-          delete-only-untagged-versions: true
+  #   steps:
+  #     - uses: actions/delete-package-versions@v5
+  #       with:
+  #         package-name: ${{ github.event.repository.name }}
+  #         package-type: container
+  #         delete-only-untagged-versions: true
