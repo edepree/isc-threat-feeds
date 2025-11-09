@@ -18,5 +18,5 @@ docker run \
   --name isc-threat-feeds \
   -p 80:8080 \
   --restart unless-stopped \
-  ghcr.io/edepree/isc-threat-feeds:master
+  ghcr.io/edepree/isc-threat-feeds:v1.1.0
 ```
