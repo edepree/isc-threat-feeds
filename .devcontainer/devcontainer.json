@@ -1,0 +1,19 @@
+{
+  "name": "Python 3.13",
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "remote.autoForwardPorts": false
+      },
+      "extensions": [
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-python-envs",
+        "streetsidesoftware.code-spell-checker",
+        "ms-azuretools.vscode-containers"
+      ]
+    }
+  }
+}

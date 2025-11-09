@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "deny": [
+      "WebFetch",
+      "WebSearch"
+    ]
+  },
+  "env": {
+    "ANTHROPIC_API_KEY": "12345",
+    "ANTHROPIC_BASE_URL": "http://llm.home.arpa:4000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  }
+}
