@@ -8,19 +8,7 @@ A GitHub Action refreshes the lists daily and commits them to [`feeds/`](feeds/)
 * https://raw.githubusercontent.com/edepree/isc-threat-feeds/master/feeds/alltor.txt
 * https://raw.githubusercontent.com/edepree/isc-threat-feeds/master/feeds/torexit.txt
 
-## Running Locally
+## Projects
 
-```bash
-uv run isc_threat_feeds.py
-```
-
-## Development
-
-Linting, formatting, and typing follow the Google Python Style Guide via ruff and ty. CI runs:
-
-```bash
-uv run ruff format --check .
-uv run ruff check .
-uv run ty check
-uv run pytest
-```
+* [`isc-feeds/`](isc-feeds/README.md): generates the lists above.
+* [`unifi-connector/`](unifi-connector/README.md): container that syncs the lists into UniFi Network traffic matching lists.

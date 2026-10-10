@@ -42,7 +42,7 @@ def test_to_cidrs_rejects_zero_padded_octets() -> None:
 
 
 def test_main_writes_every_feed(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
-    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(isc_threat_feeds, "OUTPUT_DIR", tmp_path / "feeds")
     monkeypatch.setattr(requests, "get", lambda *_args, **_kwargs: FakeResponse([{"ipv4": "1.2.3.4"}]))
 
     isc_threat_feeds.main()
@@ -56,10 +56,14 @@ def test_main_writes_nothing_when_any_feed_fails(monkeypatch: pytest.MonkeyPatch
     def fake_get(url: str, **_kwargs: object) -> FakeResponse:
         return FakeResponse([], status=503) if "torexit" in url else FakeResponse([{"ipv4": "1.2.3.4"}])
 
-    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(isc_threat_feeds, "OUTPUT_DIR", tmp_path / "feeds")
     monkeypatch.setattr(requests, "get", fake_get)
 
     with pytest.raises(requests.HTTPError):
         isc_threat_feeds.main()
 
     assert not (tmp_path / "feeds").exists()
+
+
+def test_output_dir_is_repo_root_feeds() -> None:
+    assert pathlib.Path(__file__).resolve().parents[2] / "feeds" == isc_threat_feeds.OUTPUT_DIR

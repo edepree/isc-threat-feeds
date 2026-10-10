@@ -19,9 +19,11 @@ jobs:
       - uses: astral-sh/setup-uv@v10.3.0
 
       - name: Run Tests
+        working-directory: isc-feeds
         run: uv run --locked pytest
 
       - name: Generate Feeds
+        working-directory: isc-feeds
         run: uv run --locked isc_threat_feeds.py
 
       - name: Commit Changes

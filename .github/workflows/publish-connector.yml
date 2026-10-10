@@ -1,0 +1,60 @@
+name: Publish Connector
+
+on:
+  push:
+    branches: [master]
+    paths: ['unifi-connector/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency: publish-connector
+
+env:
+  IMAGE: ghcr.io/edepree/isc-unifi-connector
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: unifi-connector
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.0
+
+      - name: Read Version
+        id: version
+        run: echo "version=$(uv version --short)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Published
+        id: published
+        run: |
+          if docker manifest inspect "$IMAGE:${{ steps.version.outputs.version }}" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$IMAGE:${{ steps.version.outputs.version }} is already published"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.published.outputs.exists == 'false'
+        uses: docker/setup-buildx-action@v4
+
+      - if: steps.published.outputs.exists == 'false'
+        uses: docker/build-push-action@v7
+        with:
+          context: unifi-connector
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.version.outputs.version }}
+            ${{ env.IMAGE }}:latest

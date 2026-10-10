@@ -13,6 +13,8 @@ FEEDS = {
     "alltor": "threatlist",
     "torexit": "threatlist",
 }
+
+OUTPUT_DIR = pathlib.Path(__file__).resolve().parent.parent / "feeds"
 HEADERS = {"User-Agent": "isc-threat-feeds (https://github.com/edepree/isc-threat-feeds)"}
 
 
@@ -37,17 +39,16 @@ def to_cidrs(records: typing.Any) -> str:  # noqa: ANN401 - raw JSON from the IS
 
 
 def main() -> None:
-    """Fetches every feed and writes `feeds/<name>.txt` only after all of them validate."""
+    """Fetches every feed and writes `OUTPUT_DIR/<name>.txt` only after all of them validate."""
     results = {}
     for name, kind in FEEDS.items():
         response = requests.get(f"https://isc.sans.edu/api/{kind}/{name}?json", headers=HEADERS, timeout=10)
         response.raise_for_status()
         results[name] = to_cidrs(response.json())
 
-    output_dir = pathlib.Path("feeds")
-    output_dir.mkdir(exist_ok=True)
+    OUTPUT_DIR.mkdir(exist_ok=True)
     for name, cidrs in results.items():
-        (output_dir / f"{name}.txt").write_text(cidrs)
+        (OUTPUT_DIR / f"{name}.txt").write_text(cidrs)
 
 
 if __name__ == "__main__":
