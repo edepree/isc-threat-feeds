@@ -32,8 +32,8 @@ def to_cidrs(records: typing.Any) -> str:  # noqa: ANN401 - raw JSON from the IS
         raise ValueError("unexpected response shape")
     if not records:
         raise ValueError("empty feed")
-    addresses = (ipaddress.IPv4Address(record["ipv4"]) for record in records)
-    return "".join(f"{network.with_prefixlen}\n" for network in ipaddress.collapse_addresses(addresses))
+    networks = (ipaddress.IPv4Network(record["ipv4"]) for record in records)
+    return "".join(f"{network.with_prefixlen}\n" for network in ipaddress.collapse_addresses(networks))
 
 
 def main() -> None:
