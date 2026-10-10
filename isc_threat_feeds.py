@@ -1,75 +1,54 @@
+"""Fetches Internet Storm Center feeds and writes them as IPv4 CIDR lists."""
+
 import ipaddress
-import logging
-from typing import Any
+import pathlib
+import typing
 
 import requests
-from flask import Flask, Response, abort, redirect, request
 
-app = Flask(__name__)
+FEEDS = {
+    "bots": "threatcategory",
+    "malware": "threatcategory",
+    "research": "threatcategory",
+    "alltor": "threatlist",
+    "torexit": "threatlist",
+}
+HEADERS = {"User-Agent": "isc-threat-feeds (https://github.com/edepree/isc-threat-feeds)"}
 
-if __name__ != '__main__':
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
 
-def process_response(response: requests.Response) -> str:
+def to_cidrs(records: typing.Any) -> str:  # noqa: ANN401 - raw JSON from the ISC API is untyped until validated
+    """Collapses ISC records into newline-delimited CIDRs.
+
+    Args:
+        records: Decoded JSON from the ISC API, expected to be a list of objects with an `ipv4` key.
+
+    Returns:
+        The collapsed networks in CIDR notation, one per line, with a trailing newline.
+
+    Raises:
+        ValueError: If `records` is not a non-empty list or contains an invalid address.
     """
-    Processes the HTTP response from the ISC SANS API, extracts IPv4 addresses,
-    condenses contiguous addresses into larger subnets, and formats the result
-    as a newline-delimited string of subnets in CIDR notation.
-    """
-    try:
-        response_content = response.json()
+    if not isinstance(records, list):
+        raise ValueError("unexpected response shape")
+    if not records:
+        raise ValueError("empty feed")
+    addresses = (ipaddress.IPv4Address(record["ipv4"]) for record in records)
+    return "".join(f"{network.with_prefixlen}\n" for network in ipaddress.collapse_addresses(addresses))
 
-        network_addresses = [ipaddress.IPv4Address(i['ipv4']) for i in response_content]
-        condensed_addresses = ipaddress.collapse_addresses(network_addresses)
 
-        return '\n'.join([x.with_prefixlen for x in condensed_addresses])
-    except Exception as e:
-        app.logger.error(f'Processing Error: {e}')
-        abort(500, description='Processing error')
-
-@app.errorhandler(404)
-def page_not_found(error: Any) -> Response:
-    return redirect('https://github.com/edepree/isc-threat-feeds'), 302
-
-@app.route('/health', methods=['GET'])
-def health() -> Response:
-    return Response('ok', mimetype='text/plain')
-
-@app.route('/threatcategory/<any(bots, malware, research):threat_category_name>', methods=['GET'])
-def get_threat_category(threat_category_name: str) -> Response:
-    try:
-        response = requests.get(
-            f'https://isc.sans.edu/api/threatcategory/{threat_category_name}?json',
-            timeout=10
-        )
+def main() -> None:
+    """Fetches every feed and writes `feeds/<name>.txt` only after all of them validate."""
+    results = {}
+    for name, kind in FEEDS.items():
+        response = requests.get(f"https://isc.sans.edu/api/{kind}/{name}?json", headers=HEADERS, timeout=10)
         response.raise_for_status()
+        results[name] = to_cidrs(response.json())
 
-        addresses = process_response(response)
-        app.logger.info(f'request from "{request.remote_addr}" for threat category "{threat_category_name}"')
+    output_dir = pathlib.Path("feeds")
+    output_dir.mkdir(exist_ok=True)
+    for name, cidrs in results.items():
+        (output_dir / f"{name}.txt").write_text(cidrs)
 
-        return Response(addresses, mimetype='text/plain')
-    except requests.RequestException as e:
-        app.logger.error(f'Upstream Error: {e}')
-        abort(502, description='Upstream Service Error')
 
-@app.route('/threatlist/<any(alltor, torexit):threat_feed_name>', methods=['GET'])
-def get_threat_list(threat_feed_name: str) -> Response:
-    try:
-        response = requests.get(
-            f'https://isc.sans.edu/api/threatlist/{threat_feed_name}?json',
-            timeout=10
-        )
-        response.raise_for_status()
-
-        addresses = process_response(response)
-        app.logger.info(f'request from "{request.remote_addr}" for threat list "{threat_feed_name}"')
-
-        return Response(addresses, mimetype='text/plain')
-    except requests.RequestException as e:
-        app.logger.error(f'Upstream Error: {e}')
-        abort(502, description='Upstream Service Error')
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+if __name__ == "__main__":
+    main()

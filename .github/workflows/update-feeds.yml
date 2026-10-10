@@ -1,0 +1,32 @@
+name: Update Feeds
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: update-feeds
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.0
+
+      - name: Run Tests
+        run: uv run --locked pytest
+
+      - name: Generate Feeds
+        run: uv run --locked isc_threat_feeds.py
+
+      - name: Commit Changes
+        run: |
+          git add feeds/
+          git diff --cached --quiet && exit 0
+          git -c user.name='github-actions[bot]' -c user.email='41898283+github-actions[bot]@users.noreply.github.com' commit -m 'chore: update feeds'
+          git push
