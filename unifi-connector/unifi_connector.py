@@ -157,7 +157,12 @@ def format_error(response: requests.Response) -> str:
 
 def list_body(name: str, cidrs: list[str]) -> ApiObject:
     """Builds the create/update payload for an IPv4 traffic matching list."""
-    return {"type": "IPV4_ADDRESSES", "name": name, "items": [{"type": "SUBNET", "value": c} for c in cidrs]}
+    # UniFi rejects a /32 SUBNET (422 invalid-items); single hosts must be IP_ADDRESS.
+    items = [
+        {"type": "IP_ADDRESS", "value": c.removesuffix("/32")} if c.endswith("/32") else {"type": "SUBNET", "value": c}
+        for c in cidrs
+    ]
+    return {"type": "IPV4_ADDRESSES", "name": name, "items": items}
 
 
 class UnifiClient:

@@ -212,11 +212,15 @@ def test_lists_returns_raw_objects() -> None:
 
 def test_create_list_posts_body() -> None:
     client, session = make_client(fake_response(201, {"id": "L1"}))
-    client.create_list("s", "isc-bots", ["1.2.3.4/32"])
+    client.create_list("s", "isc-bots", ["1.2.3.4/32", "5.6.7.8/31"])
     session.request.assert_called_once_with(
         "POST",
         "https://u/integration/v1/sites/s/traffic-matching-lists",
-        json={"type": "IPV4_ADDRESSES", "name": "isc-bots", "items": [{"type": "SUBNET", "value": "1.2.3.4/32"}]},
+        json={
+            "type": "IPV4_ADDRESSES",
+            "name": "isc-bots",
+            "items": [{"type": "IP_ADDRESS", "value": "1.2.3.4"}, {"type": "SUBNET", "value": "5.6.7.8/31"}],
+        },
         timeout=30,
         verify=False,
         allow_redirects=False,
