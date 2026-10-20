@@ -42,6 +42,7 @@ select = [
     "RET",          # return statements
     "RUF",          # ruff-specific rules
 ]
+ignore = ["SIM108"]  # prefer if/else blocks over ternary assignments
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "D"]  # pytest relies on assert; test docstrings are optional in the Google style guide

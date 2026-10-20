@@ -9,13 +9,14 @@ import isc_threat_feeds
 
 
 class FakeResponse:
-    def __init__(self, payload: object, status: int = 200) -> None:
+    def __init__(self, payload: object, status: int = 200, headers: dict[str, str] | None = None) -> None:
         self.payload = payload
-        self.status = status
+        self.status_code = status
+        self.headers = headers or {}
 
     def raise_for_status(self) -> None:
-        if self.status >= http.HTTPStatus.BAD_REQUEST:
-            raise requests.HTTPError(f"{self.status}")
+        if self.status_code >= http.HTTPStatus.BAD_REQUEST:
+            raise requests.HTTPError(f"{self.status_code}")
 
     def json(self) -> object:
         return self.payload
@@ -63,6 +64,28 @@ def test_main_writes_nothing_when_any_feed_fails(monkeypatch: pytest.MonkeyPatch
         isc_threat_feeds.main()
 
     assert not (tmp_path / "feeds").exists()
+
+
+@pytest.mark.parametrize(("retry_after", "expected_sleep"), [("7", 7), ("", 300), ("99999", 900)])
+def test_fetch_retries_once_after_429(monkeypatch: pytest.MonkeyPatch, retry_after: str, expected_sleep: int) -> None:
+    responses = [
+        FakeResponse(None, status=429, headers={"Retry-After": retry_after}),
+        FakeResponse([{"ipv4": "1.2.3.4"}]),
+    ]
+    sleeps = []
+    monkeypatch.setattr(requests, "get", lambda *_args, **_kwargs: responses.pop(0))
+    monkeypatch.setattr(isc_threat_feeds.time, "sleep", sleeps.append)
+
+    assert isc_threat_feeds.fetch("https://isc.sans.edu/api/x") == [{"ipv4": "1.2.3.4"}]
+    assert sleeps == [expected_sleep]
+
+
+def test_fetch_raises_when_retry_is_also_429(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(requests, "get", lambda *_args, **_kwargs: FakeResponse(None, status=429))
+    monkeypatch.setattr(isc_threat_feeds.time, "sleep", lambda _seconds: None)
+
+    with pytest.raises(requests.HTTPError):
+        isc_threat_feeds.fetch("https://isc.sans.edu/api/x")
 
 
 def test_output_dir_is_repo_root_feeds() -> None:

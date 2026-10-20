@@ -71,7 +71,7 @@ def load_config(env: collections.abc.Mapping[str, str]) -> Config:
     if unknown:
         raise ConfigError(f"FEEDS has unknown feeds: {', '.join(unknown)} (choose from {', '.join(FEEDS)})")
 
-    raw_verify = env.get("UNIFI_VERIFY_TLS", "true").strip()
+    raw_verify = env.get("UNIFI_VERIFY_TLS", "").strip() or "true"
     verify: bool | str
 
     if raw_verify.lower() in {"true", "false"}:
@@ -209,16 +209,27 @@ class UnifiClient:
         return response.json() if response.content else None
 
     def paginate(self, path: str) -> list[ApiObject]:
-        """Collects every item from a paged list endpoint."""
+        """Collects every item from a paged list endpoint.
+
+        Raises:
+            UnifiError: If a page is not an object with a `data` list and an integer `totalCount`.
+        """
         items: list[ApiObject] = []
         offset = 0
 
         while True:
             page = self.request("GET", path, params={"offset": offset, "limit": PAGE_SIZE})
+            if not (
+                isinstance(page, dict)
+                and isinstance(page.get("data"), list)
+                and isinstance(page.get("totalCount"), int)
+            ):
+                raise UnifiError(f"unexpected page shape from {path}")
             items.extend(page["data"])
-            offset += PAGE_SIZE
+            # advance by what came back: the server may cap `limit` below PAGE_SIZE.
+            offset += len(page["data"])
 
-            if offset >= page["totalCount"]:
+            if not page["data"] or offset >= page["totalCount"]:
                 return items
 
     def site_id(self, site: str) -> str:

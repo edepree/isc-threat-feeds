@@ -48,7 +48,7 @@ def test_load_config_site_override() -> None:
     assert unifi_connector.load_config({**BASE, "UNIFI_SITE": "Home"}).site == "Home"
 
 
-@pytest.mark.parametrize(("value", "expected"), [("true", True), ("FALSE", False), ("True", True)])
+@pytest.mark.parametrize(("value", "expected"), [("true", True), ("FALSE", False), ("True", True), (" ", True)])
 def test_load_config_verify_bool(value: str, expected: bool) -> None:
     assert unifi_connector.load_config({**BASE, "UNIFI_VERIFY_TLS": value}).verify is expected
 
@@ -185,6 +185,28 @@ def test_paginate_collects_pages() -> None:
     assert offsets == [{"offset": 0, "limit": 200}, {"offset": 200, "limit": 200}]
     assert session.request.call_args.args == ("GET", "https://u/integration/v1/sites")
     assert session.request.call_args.kwargs["timeout"] == 30  # noqa: PLR2004
+
+
+def test_paginate_advances_by_returned_count() -> None:
+    first = [{"id": str(i)} for i in range(100)]
+    second = [{"id": str(i)} for i in range(100, 150)]
+    client, session = make_client(page(first, 0, 150), page(second, 100, 150))
+
+    assert client.paginate("/v1/sites") == first + second
+    assert session.request.call_args.kwargs["params"] == {"offset": 100, "limit": 200}
+
+
+def test_paginate_stops_on_empty_page() -> None:
+    client, _session = make_client(page([], 0, 5))
+    assert client.paginate("/v1/sites") == []
+
+
+@pytest.mark.parametrize("body", [None, {"data": [], "count": 0}, {"data": {}, "totalCount": 0}])
+def test_paginate_rejects_unexpected_shape(body: object) -> None:
+    client, _session = make_client(fake_response(payload=body))
+
+    with pytest.raises(unifi_connector.UnifiError, match="unexpected page shape"):
+        client.paginate("/v1/sites")
 
 
 def test_site_id_matches_internal_reference() -> None:
