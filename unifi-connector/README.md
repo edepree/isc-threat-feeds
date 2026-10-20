@@ -44,10 +44,10 @@ The connector only creates and updates lists named `isc-*`. It never touches fir
 ## Development
 
 ```bash
-make format   # apply formatting and safe lint fixes
-make check    # what CI runs: format check, lint, type check, tests
-make upgrade  # upgrade locked dependencies
-make image    # build ghcr.io/edepree/isc-unifi-connector:<version> and :latest locally
+just format   # apply formatting and safe lint fixes
+just check    # what CI runs: format check, lint, type check, tests
+just upgrade  # upgrade locked dependencies
+just image    # build ghcr.io/edepree/isc-unifi-connector:<version> and :latest locally
 ```
 
 The image version is the `version` in `pyproject.toml`. To release, bump it (for example `uv version --bump patch`) and merge to `master`. The [publish workflow](../.github/workflows/publish-connector.yml) builds and pushes `ghcr.io/edepree/isc-unifi-connector:<version>` and `:latest` (`linux/amd64`) only if that version isn't already published. Merges that don't bump the version publish nothing.

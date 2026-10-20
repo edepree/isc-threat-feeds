@@ -1,0 +1,26 @@
+# apply formatting and safe lint fixes
+format:
+    uv run ruff format .
+    uv run ruff check --fix .
+
+# format check, lint, type check
+lint:
+    uv run --locked ruff format --check .
+    uv run --locked ruff check .
+    uv run --locked ty check
+
+# run tests
+test:
+    uv run --locked pytest
+
+# what CI runs
+check: lint test
+
+# upgrade locked dependencies
+upgrade:
+    uv lock --upgrade
+    uv sync
+
+# fetch ISC feeds and write them to ../feeds
+generate:
+    uv run --locked isc_threat_feeds.py

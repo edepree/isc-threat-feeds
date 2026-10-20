@@ -250,9 +250,10 @@ def _normalized(items: list[ApiObject]) -> set[str]:
     # Items the connector would not write (ranges, unparsable values) stay distinct so they force an update.
     values = set()
     for item in items:
+        if item.get("type") not in {"SUBNET", "IP_ADDRESS"}:
+            values.add(repr(item))
+            continue
         try:
-            if item.get("type") not in {"SUBNET", "IP_ADDRESS"}:
-                raise ValueError
             values.add(ipaddress.IPv4Network(item["value"]).with_prefixlen)
         except (KeyError, ValueError):
             values.add(repr(item))

@@ -18,13 +18,16 @@ jobs:
 
       - uses: astral-sh/setup-uv@v10.3.0
 
+      - name: Install just
+        run: uv tool install rust-just
+
       - name: Run Tests
         working-directory: isc-feeds
-        run: uv run --locked pytest
+        run: just test
 
       - name: Generate Feeds
         working-directory: isc-feeds
-        run: uv run --locked isc_threat_feeds.py
+        run: just generate
 
       - name: Commit Changes
         run: |

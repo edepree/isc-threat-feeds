@@ -5,7 +5,7 @@ Pulls the Internet Storm Center feeds, collapses them into IPv4 CIDRs, and write
 ## Running Locally
 
 ```bash
-uv run isc_threat_feeds.py
+just generate
 ```
 
 ## Development
@@ -13,7 +13,7 @@ uv run isc_threat_feeds.py
 Linting, formatting, and typing follow the Google Python Style Guide via ruff and ty.
 
 ```bash
-make format   # apply formatting and safe lint fixes
-make check    # what CI runs: format check, lint, type check, tests
-make upgrade  # upgrade locked dependencies
+just format   # apply formatting and safe lint fixes
+just check    # what CI runs: format check, lint, type check, tests
+just upgrade  # upgrade locked dependencies
 ```
