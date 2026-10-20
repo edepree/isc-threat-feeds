@@ -1,3 +1,7 @@
+# list recipes
+default:
+    @just --list
+
 # apply formatting and safe lint fixes
 format:
     uv run ruff format .
@@ -21,7 +25,7 @@ upgrade:
     uv lock --upgrade
     uv sync
 
-image_name := "ghcr.io/edepree/isc-unifi-connector"
+image_name := env("IMAGE", "ghcr.io/edepree/isc-unifi-connector")
 
 # build the image tagged with the project version and latest
 image:

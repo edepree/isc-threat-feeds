@@ -22,7 +22,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.3.0
 
       - name: Install just
-        run: uv tool install rust-just
+        run: uv tool install rust-just==1.58.0
 
       - name: Check
         run: just check

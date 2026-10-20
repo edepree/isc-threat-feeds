@@ -1,3 +1,7 @@
+# list recipes
+default:
+    @just --list
+
 # apply formatting and safe lint fixes
 format:
     uv run ruff format .

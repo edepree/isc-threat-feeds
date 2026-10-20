@@ -19,7 +19,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.3.0
 
       - name: Install just
-        run: uv tool install rust-just
+        run: uv tool install rust-just==1.58.0
 
       - name: Run Tests
         working-directory: isc-feeds
@@ -33,5 +33,9 @@ jobs:
         run: |
           git add feeds/
           git diff --cached --quiet && exit 0
-          git -c user.name='github-actions[bot]' -c user.email='41898283+github-actions[bot]@users.noreply.github.com' commit -m 'chore: update feeds'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898283+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: update feeds'
+          # master may have moved since checkout; rebase so the push is a fast-forward
+          git pull --rebase
           git push

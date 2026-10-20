@@ -26,6 +26,12 @@ jobs:
 
       - uses: astral-sh/setup-uv@v10.3.0
 
+      - name: Install just
+        run: uv tool install rust-just==1.58.0
+
+      - name: Check
+        run: just check
+
       - name: Read Version
         id: version
         run: echo "version=$(uv version --short)" >> "$GITHUB_OUTPUT"
@@ -39,11 +45,15 @@ jobs:
       - name: Check Published
         id: published
         run: |
-          if docker manifest inspect "$IMAGE:${{ steps.version.outputs.version }}" > /dev/null 2>&1; then
+          if out=$(docker manifest inspect "$IMAGE:${{ steps.version.outputs.version }}" 2>&1); then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "::notice::$IMAGE:${{ steps.version.outputs.version }} is already published"
-          else
+          elif grep -qi 'manifest unknown\|not found' <<< "$out"; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            # an auth or network error must not be mistaken for "unpublished" and overwrite the tag
+            echo "::error::docker manifest inspect failed: $out"
+            exit 1
           fi
 
       - if: steps.published.outputs.exists == 'false'
