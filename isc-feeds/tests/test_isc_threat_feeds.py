@@ -66,6 +66,24 @@ def test_main_writes_nothing_when_any_feed_fails(monkeypatch: pytest.MonkeyPatch
     assert not (tmp_path / "feeds").exists()
 
 
+def test_main_keeps_last_list_when_feed_is_empty(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
+    def fake_get(url: str, **_kwargs: object) -> FakeResponse:
+        if "bots" in url:
+            return FakeResponse([])
+        return FakeResponse([{"ipv4": "1.2.3.4"}])
+
+    output_dir = tmp_path / "feeds"
+    output_dir.mkdir()
+    (output_dir / "bots.txt").write_text("9.9.9.9/32\n")
+    monkeypatch.setattr(isc_threat_feeds, "OUTPUT_DIR", output_dir)
+    monkeypatch.setattr(requests, "get", fake_get)
+
+    isc_threat_feeds.main()
+
+    assert (output_dir / "bots.txt").read_text() == "9.9.9.9/32\n"
+    assert (output_dir / "torexit.txt").read_text() == "1.2.3.4/32\n"
+
+
 @pytest.mark.parametrize(("retry_after", "expected_sleep"), [("7", 7), ("", 300), ("99999", 900)])
 def test_fetch_retries_once_after_429(monkeypatch: pytest.MonkeyPatch, retry_after: str, expected_sleep: int) -> None:
     responses = [

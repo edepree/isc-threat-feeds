@@ -8,6 +8,8 @@ A GitHub Action refreshes the lists daily and commits them to [`feeds/`](feeds/)
 * https://raw.githubusercontent.com/edepree/isc-threat-feeds/master/feeds/alltor.txt
 * https://raw.githubusercontent.com/edepree/isc-threat-feeds/master/feeds/torexit.txt
 
+If ISC has no IPs for a feed in the last 7 days (the source went quiet), that list keeps its last contents instead of being emptied. Check a list's commit history to see when it last changed, and the [ISC Threat Feeds page](https://isc.sans.edu/data/threatfeed.html) for each source's activity.
+
 ## Projects
 
 * [`isc-feeds/`](isc-feeds/README.md): generates the lists above.

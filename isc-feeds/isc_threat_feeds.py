@@ -3,6 +3,7 @@
 import http
 import ipaddress
 import pathlib
+import sys
 import time
 import typing
 
@@ -74,10 +75,20 @@ def fetch(url: str) -> typing.Any:  # noqa: ANN401 - raw JSON from the ISC API i
 
 
 def main() -> None:
-    """Fetches every feed and writes `OUTPUT_DIR/<name>.txt` only after all of them validate."""
+    """Fetches every feed and writes `OUTPUT_DIR/<name>.txt` only after all of them validate.
+
+    A feed that comes back empty keeps its last list, since ISC returns `[]` when a source has gone quiet for 7 days.
+    """
     results = {}
     for name, kind in FEEDS.items():
-        results[name] = to_cidrs(fetch(f"https://isc.sans.edu/api/{kind}/{name}?json"))
+        records = fetch(f"https://isc.sans.edu/api/{kind}/{name}?json")
+
+        if records == []:
+            # ::warning:: surfaces as an annotation on the GitHub Actions run summary
+            print(f"::warning::{name} is empty, keeping the last list", file=sys.stderr)
+            continue
+
+        results[name] = to_cidrs(records)
 
     OUTPUT_DIR.mkdir(exist_ok=True)
     for name, cidrs in results.items():
